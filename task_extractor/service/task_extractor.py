@@ -44,10 +44,10 @@ class TaskExtractorService:
     
     # Default team members with their expertise areas
     DEFAULT_TEAM = {
-        'mohit': ['backend', 'api', 'database', 'performance'],
-        'lata': ['frontend', 'ui', 'design', 'css'],
-        'arjun': ['testing', 'qa', 'automation'],
-        'sakshi': ['devops', 'deployment', 'infrastructure']
+        'mohit': ['backend', 'api', 'database', 'performance', 'query', 'sql', 'server'],
+        'lata': ['frontend', 'ui', 'design', 'css', 'dashboard', 'component', 'page'],
+        'arjun': ['testing', 'qa', 'automation', 'test', 'bug', 'debug'],
+        'sakshi': ['devops', 'deployment', 'infrastructure', 'docker', 'deploy', 'pipeline']
     }
     
     # Deadline extraction patterns
@@ -89,34 +89,101 @@ class TaskExtractorService:
     def _rule_based_extraction(self, text: str) -> List[ExtractedTask]:
         """Extract tasks using simple pattern matching."""
         tasks = []
+        seen_tasks = set()
         
-        # Simple pattern: "Name, please handle/fix X"
-        pattern = re.compile(
-            r'(?P<assignee>\w+),?\s+(?:please\s+)?(?:handle|fix|work\s+on)\s+(?:the\s+)?(?P<task>[^.]+)',
+        # Pattern 1: "Name, please handle/fix X"
+        pattern1 = re.compile(
+            r'(?P<assignee>\w+),?\s+(?:please\s+)?(?:handle|fix|work\s+on|complete|update)\s+(?:the\s+)?(?P<task>[^.]+)',
             re.IGNORECASE
         )
         
-        for match in pattern.finditer(text):
-            assignee = match.group('assignee').lower()
-            if assignee in self.team_members:
-                task_desc = match.group('task').strip()
+        # Pattern 2: "Name will handle X"
+        pattern2 = re.compile(
+            r'(?P<assignee>\w+)\s+will\s+(?:handle|work\s+on|do|complete)\s+(?:the\s+)?(?P<task>[^.,]+)',
+            re.IGNORECASE
+        )
+        
+        # Pattern 3: "Name, we need you to X"
+        pattern3 = re.compile(
+            r'(?P<assignee>\w+),?\s+(?:we\s+need\s+you\s+to|you\s+should|can\s+you)\s+(?P<task>[^.?!]+)',
+            re.IGNORECASE
+        )
+        
+        # Pattern 4: Generic tasks "we need to X" - infer assignee
+        pattern4 = re.compile(
+            r'(?:we\s+need\s+to|someone\s+should|we\s+should)\s+(?P<task>[^.?!]+)',
+            re.IGNORECASE
+        )
+        
+        for pattern in [pattern1, pattern2, pattern3]:
+            for match in pattern.finditer(text):
+                assignee = match.group('assignee').lower()
+                if assignee in self.team_members:
+                    task_desc = match.group('task').strip()
+                    
+                    # Skip duplicates
+                    task_key = task_desc.lower()[:50]
+                    if task_key in seen_tasks:
+                        continue
+                    seen_tasks.add(task_key)
+                    
+                    # Extract deadline from task description
+                    deadline = self._extract_deadline(task_desc)
+                    
+                    # Extract priority
+                    priority = self._extract_priority(task_desc)
+                    
+                    tasks.append(ExtractedTask(
+                        id=len(tasks) + 1,
+                        description=task_desc,
+                        assigned_to=assignee.title(),
+                        deadline=deadline,
+                        priority=priority,
+                        confidence=0.85
+                    ))
+        
+        # Handle generic tasks with inferred assignee
+        for match in pattern4.finditer(text):
+            task_desc = match.group('task').strip()
+            
+            # Skip duplicates
+            task_key = task_desc.lower()[:50]
+            if task_key in seen_tasks:
+                continue
+            
+            # Infer assignee based on content
+            assignee = self._infer_assignee(task_desc)
+            if assignee:
+                seen_tasks.add(task_key)
                 
-                # Extract deadline from task description
                 deadline = self._extract_deadline(task_desc)
-                
-                # Extract priority
                 priority = self._extract_priority(task_desc)
                 
                 tasks.append(ExtractedTask(
                     id=len(tasks) + 1,
                     description=task_desc,
-                    assigned_to=assignee.title(),
+                    assigned_to=assignee,
                     deadline=deadline,
                     priority=priority,
-                    confidence=0.8
+                    confidence=0.70
                 ))
         
         return tasks
+    
+    def _infer_assignee(self, task_description: str) -> Optional[str]:
+        """Infer assignee based on task keywords and team expertise."""
+        task_lower = task_description.lower()
+        scores = {}
+        
+        for member, keywords in self.team_members.items():
+            score = sum(1 for keyword in keywords if keyword in task_lower)
+            if score > 0:
+                scores[member] = score
+        
+        if scores:
+            best_member = max(scores, key=scores.get)
+            return best_member.title()
+        return None
     
     def _extract_deadline(self, text: str) -> Optional[str]:
         """Extract deadline from text."""
