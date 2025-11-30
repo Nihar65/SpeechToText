@@ -57,7 +57,7 @@ class DeepgramConfig:
     diarize: bool = True
     smart_format: bool = True
     
-    def __post_init__(self):
+    def _post_init_(self):
         if self.api_key is None:
             self.api_key = os.environ.get('DEEPGRAM_API_KEY')
 
@@ -106,11 +106,11 @@ class Config:
     
     def to_json(self, path: str):
         data = {
-            'model': self.model.__dict__,
-            'training': self.training.__dict__,
+            'model': self.model._dict_,
+            'training': self.training._dict_,
             'team': {'members': self.team.members},
-            'deepgram': {k: v for k, v in self.deepgram.__dict__.items() if k != 'api_key'},
-            'api': self.api.__dict__,
+            'deepgram': {k: v for k, v in self.deepgram._dict_.items() if k != 'api_key'},
+            'api': self.api._dict_,
             'model_path': self.model_path,
             'tokenizer_path': self.tokenizer_path,
             'data_path': self.data_path,
@@ -122,5 +122,27 @@ class Config:
     
     @classmethod
     def from_env(cls) -> 'Config':
+        """Load configuration from environment variables."""
         config = cls()
-        if os.environ.get('MODEL_PATH'): config.model_path = os.en
+        
+        # Override with environment variables
+        if os.environ.get('MODEL_PATH'):
+            config.model_path = os.environ['MODEL_PATH']
+        if os.environ.get('TOKENIZER_PATH'):
+            config.tokenizer_path = os.environ['TOKENIZER_PATH']
+        if os.environ.get('DATA_PATH'):
+            config.data_path = os.environ['DATA_PATH']
+        if os.environ.get('OUTPUT_DIR'):
+            config.output_dir = os.environ['OUTPUT_DIR']
+        
+        # API config
+        if os.environ.get('API_HOST'):
+            config.api.host = os.environ['API_HOST']
+        if os.environ.get('API_PORT'):
+            config.api.port = int(os.environ['API_PORT'])
+        
+        return config
+
+
+# Default configuration instance
+default_config = Config()
