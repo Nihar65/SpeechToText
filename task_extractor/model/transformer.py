@@ -4,8 +4,8 @@ from typing import Dict, List, Optional, Tuple, Any
 from .components import TokenEmbedding, PositionalEncoding, TransformerEncoder, ConditionalRandomField
 
 class TaskExtractionTransformer(nn.Module):
-    def _init_(self, vocab_size: int, d_model: int = 256, num_heads: int = 8, num_layers: int = 6, d_ff: int = 1024, max_seq_len: int = 512, num_assignees: int = 5, num_priorities: int = 4, num_bio_tags: int = 9, dropout: float = 0.1, use_crf: bool = True, pre_norm: bool = True):
-        super()._init_()
+    def init(self, vocab_size: int, d_model: int = 256, num_heads: int = 8, num_layers: int = 6, d_ff: int = 1024, max_seq_len: int = 512, num_assignees: int = 5, num_priorities: int = 4, num_bio_tags: int = 9, dropout: float = 0.1, use_crf: bool = True, pre_norm: bool = True):
+        super().init()
         self.d_model = d_model
         self.use_crf = use_crf
         self.token_embedding = TokenEmbedding(vocab_size, d_model)

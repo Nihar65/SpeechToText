@@ -1,7 +1,7 @@
 from .transformer import TaskExtractionTransformer
 from .components import MultiHeadAttention
 
-_all_ = [
+all = [
     "TaskExtractionTransformer",
     "MultiHeadAttention"
 ]

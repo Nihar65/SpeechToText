@@ -14,7 +14,7 @@ PRIORITY_LABELS = {'low': 0, 'medium': 1, 'high': 2, 'critical': 3}
 DEFAULT_ASSIGNEES = ['mohit', 'lata', 'arjun', 'sakshi']
 
 class TaskExtractionDataset(Dataset):
-    def _init_(self, data_path: str, tokenizer: Any, max_length: int = 512, assignees: Optional[List[str]] = None):
+    def __init__(self, data_path: str, tokenizer: Any, max_length: int = 512, assignees: Optional[List[str]] = None):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.assignees = [a.lower() for a in (assignees or DEFAULT_ASSIGNEES)]
@@ -113,9 +113,9 @@ class TaskExtractionDataset(Dataset):
                     first_token = False
                     labeled_tokens.add(token_idx)
     
-    def _len_(self) -> int: return len(self.samples)
+    def len(self) -> int: return len(self.samples)
     
-    def _getitem_(self, idx: int) -> Dict[str, torch.Tensor]:
+    def getitem(self, idx: int) -> Dict[str, torch.Tensor]:
         sample = self.samples[idx]
         text = sample['text']
         tasks = sample.get('tasks', [])
@@ -145,7 +145,7 @@ class DataCollator:
     tokenizer: Any
     max_length: int = 512
     
-    def _call_(self, features: List[Dict]) -> Dict[str, torch.Tensor]:
+    def call(self, features: List[Dict]) -> Dict[str, torch.Tensor]:
         max_len = min(max(len(f['input_ids']) for f in features), self.max_length)
         batch = {k: [] for k in ['input_ids', 'attention_mask', 'bio_labels', 'assignee_labels', 'priority_labels', 'deadline_labels']}
         

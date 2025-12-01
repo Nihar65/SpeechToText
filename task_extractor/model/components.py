@@ -5,8 +5,8 @@ import torch.nn.functional as F
 from typing import Optional, Tuple
 
 class PositionalEncoding(nn.Module):
-    def _init_(self, d_model: int, max_len: int = 5000, dropout: float = 0.1):
-        super()._init_()
+    def init(self, d_model: int, max_len: int = 5000, dropout: float = 0.1):
+        super().init()
         self.dropout = nn.Dropout(p=dropout)
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
@@ -21,16 +21,16 @@ class PositionalEncoding(nn.Module):
         return self.dropout(x)
 
 class TokenEmbedding(nn.Module):
-    def _init_(self, vocab_size: int, d_model: int):
-        super()._init_()
+    def init(self, vocab_size: int, d_model: int):
+        super().init()
         self.embedding = nn.Embedding(vocab_size, d_model)
         self.d_model = d_model
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.embedding(x) * math.sqrt(self.d_model)
 
 class MultiHeadAttention(nn.Module):
-    def _init_(self, d_model: int, num_heads: int, dropout: float = 0.1):
-        super()._init_()
+    def init(self, d_model: int, num_heads: int, dropout: float = 0.1):
+        super().init()
         assert d_model % num_heads == 0, "d_model must be divisible by num_heads"
         self.d_model = d_model
         self.num_heads = num_heads
@@ -61,8 +61,8 @@ class MultiHeadAttention(nn.Module):
         return output, attn_weights
 
 class PositionWiseFeedForward(nn.Module):
-    def _init_(self, d_model: int, d_ff: int, dropout: float = 0.1):
-        super()._init_()
+    def init(self, d_model: int, d_ff: int, dropout: float = 0.1):
+        super().init()
         self.linear1 = nn.Linear(d_model, d_ff)
         self.linear2 = nn.Linear(d_ff, d_model)
         self.dropout = nn.Dropout(p=dropout)
@@ -71,8 +71,8 @@ class PositionWiseFeedForward(nn.Module):
         return self.linear2(self.dropout(self.activation(self.linear1(x))))
 
 class TransformerEncoderLayer(nn.Module):
-    def _init_(self, d_model: int, num_heads: int, d_ff: int, dropout: float = 0.1, pre_norm: bool = True):
-        super()._init_()
+    def init(self, d_model: int, num_heads: int, d_ff: int, dropout: float = 0.1, pre_norm: bool = True):
+        super().init()
         self.pre_norm = pre_norm
         self.self_attention = MultiHeadAttention(d_model, num_heads, dropout)
         self.feed_forward = PositionWiseFeedForward(d_model, d_ff, dropout)
@@ -95,8 +95,8 @@ class TransformerEncoderLayer(nn.Module):
         return x, attn_weights
 
 class TransformerEncoder(nn.Module):
-    def _init_(self, num_layers: int, d_model: int, num_heads: int, d_ff: int, dropout: float = 0.1, pre_norm: bool = True):
-        super()._init_()
+    def init(self, num_layers: int, d_model: int, num_heads: int, d_ff: int, dropout: float = 0.1, pre_norm: bool = True):
+        super().init()
         self.layers = nn.ModuleList([TransformerEncoderLayer(d_model, num_heads, d_ff, dropout, pre_norm) for _ in range(num_layers)])
         self.final_norm = nn.LayerNorm(d_model) if pre_norm else nn.Identity()
     
@@ -108,8 +108,8 @@ class TransformerEncoder(nn.Module):
         return self.final_norm(x), attention_weights if return_attention else None
 
 class ConditionalRandomField(nn.Module):
-    def _init_(self, num_tags: int, batch_first: bool = True):
-        super()._init_()
+    def init(self, num_tags: int, batch_first: bool = True):
+        super().init()
         self.num_tags = num_tags
         self.batch_first = batch_first
         self.transitions = nn.Parameter(torch.randn(num_tags, num_tags))

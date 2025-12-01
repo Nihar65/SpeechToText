@@ -8,7 +8,7 @@ class TeamMember:
     expertise: List[str]
     aliases: List[str] = None
     
-    def _post_init_(self):
+    def postinit_(self):
         if self.aliases is None: self.aliases = []
         self.aliases.append(self.name.lower())
 
@@ -23,7 +23,7 @@ class MeetingPreprocessor:
         (r'\bnext\s+week\b', 'next monday'),
     ]
     
-    def _init_(self, team_members: Optional[List[TeamMember]] = None, remove_fillers: bool = True, normalize_numbers: bool = True):
+    def __init__(self, team_members: Optional[List[TeamMember]] = None, remove_fillers: bool = True, normalize_numbers: bool = True):
         self.team_members = team_members or []
         self.remove_fillers = remove_fillers
         self.normalize_numbers = normalize_numbers

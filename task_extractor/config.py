@@ -8,10 +8,10 @@ import json
 class ModelConfig:
     """Model architecture configuration - ~100M parameters."""
     vocab_size: int = 30000
-    d_model: int = 1024
-    num_heads: int = 16
-    num_layers: int = 8
-    d_ff: int = 2048
+    d_model: int = 1024      # Increased from 256
+    num_heads: int = 16       # Increased from 8
+    num_layers: int = 8       # Increased from 6
+    d_ff: int = 2048          # Increased from 1024
     max_seq_len: int = 512
     num_assignees: int = 5
     num_priorities: int = 4
@@ -24,12 +24,12 @@ class ModelConfig:
 @dataclass
 class TrainingConfig:
     """Training configuration for 100M model."""
-    batch_size: int = 8
-    learning_rate: float = 1e-4
+    batch_size: int = 8           # Smaller batch for larger model
+    learning_rate: float = 1e-4   # Lower LR for larger model
     weight_decay: float = 0.01
-    warmup_steps: int = 2000
-    max_epochs: int = 30
-    grad_accumulation_steps: int = 4
+    warmup_steps: int = 2000      # More warmup for larger model
+    max_epochs: int = 30          # More epochs
+    grad_accumulation_steps: int = 4  # Effective batch = 32
     max_grad_norm: float = 1.0
     use_amp: bool = True
     early_stopping_patience: int = 7
@@ -89,6 +89,7 @@ class Config:
     
     @classmethod
     def from_json(cls, path: str) -> 'Config':
+        """Load configuration from JSON file."""
         with open(path) as f:
             data = json.load(f)
         
@@ -105,6 +106,7 @@ class Config:
         )
     
     def to_json(self, path: str):
+        """Save configuration to JSON file."""
         data = {
             'model': self.model._dict_,
             'training': self.training._dict_,
