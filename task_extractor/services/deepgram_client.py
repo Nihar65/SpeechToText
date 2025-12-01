@@ -3,7 +3,7 @@ from typing import Optional, Dict, Any, BinaryIO
 from dataclasses import dataclass
 from enum import Enum
 
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 class TranscriptionModel(Enum):
     NOVA_2 = "nova-2"

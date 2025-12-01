@@ -84,7 +84,7 @@ class TaskExtractionTransformer(nn.Module):
     
     @classmethod
     def from_config(cls, config: Dict) -> 'TaskExtractionTransformer':
-        return cls(vocab_size=config.get('vocab_size', 30000), d_model=config.get('d_model', 256), num_heads=config.get('num_heads', 8), num_layers=config.get('num_layers', 6), d_ff=config.get('d_ff', 1024), max_seq_len=config.get('max_seq_len', 512), num_assignees=config.get('num_assignees', 5), num_priorities=config.get('num_priorities', 4), num_bio_tags=config.get('num_bio_tags', 9), dropout=config.get('dropout', 0.1), use_crf=config.get('use_crf', True), pre_norm=config.get('pre_norm', True))
+        return cls(vocab_size=30000, d_model=config.get('d_model', 256), num_heads=config.get('num_heads', 8), num_layers=config.get('num_layers', 6), d_ff=config.get('d_ff', 1024), max_seq_len=config.get('max_seq_len', 512), num_assignees=config.get('num_assignees', 5), num_priorities=config.get('num_priorities', 4), num_bio_tags=config.get('num_bio_tags', 9), dropout=config.get('dropout', 0.1), use_crf=config.get('use_crf', True), pre_norm=config.get('pre_norm', True))
     
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters() if p.requires_grad)

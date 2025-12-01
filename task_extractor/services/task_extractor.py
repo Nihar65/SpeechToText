@@ -1,3 +1,9 @@
+"""
+Task Extractor Service
+======================
+Main service for extracting tasks from meeting transcripts.
+"""
+
 import torch
 import json
 from typing import Dict, List, Optional, Any, Tuple
@@ -6,12 +12,11 @@ from pathlib import Path
 import logging
 import re
 
-from ..model.transformer import TaskExtractionTransformer
-from ..data.tokenizer import TaskTokenizer
-from ..data.preprocessor import MeetingPreprocessor
+from ..model import TaskExtractionTransformer
+from ..data import TaskTokenizer, MeetingPreprocessor
 from ..data.dataset import BIO_TAGS, ID_TO_BIO_TAG, PRIORITY_LABELS
 
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -167,7 +172,7 @@ class TaskExtractorService:
     # Priority mapping (reverse)
     PRIORITY_ID_TO_LABEL = {v: k for k, v in PRIORITY_LABELS.items()}
     
-    def _init_(
+    def __init__(
         self,
         model_path: Optional[str] = None,
         tokenizer_path: Optional[str] = None,
@@ -542,7 +547,7 @@ class TaskExtractorService:
         
         # Pattern 10: "X needs to be resolved/fixed/done" (task first, infer assignee)
         pattern10 = re.compile(
-            r'(?P<task>[^.]?(?:bug|issue|problem|error|task|feature)[^.]?)\s+(?:needs\s+to\s+be|should\s+be|must\s+be)\s+(?:resolved|fixed|done|completed|handled)',
+            r'(?P<task>[^.]*?(?:bug|issue|problem|error|task|feature)[^.]*?)\s+(?:needs\s+to\s+be|should\s+be|must\s+be)\s+(?:resolved|fixed|done|completed|handled)',
             re.IGNORECASE
         )
         

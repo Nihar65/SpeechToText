@@ -1,0 +1,6 @@
+task/
+task/
+.task/
+
+task_extractor/checkpoints_100m/*
+
