@@ -7,11 +7,11 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
 from torch.amp import autocast, GradScaler
 from torch.utils.data import DataLoader
-from task_extractor.models import TaskExtractionTransformer
+from task_extractor.model import TaskExtractionTransformer
 from task_extractor.data import TaskTokenizer, TaskExtractionDataset, DataCollator, create_data_loaders, BIO_TAGS
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 @dataclass
 class TrainingConfig:
@@ -154,5 +154,5 @@ def main():
     trainer = Trainer(model, train_loader, val_loader, config, tokenizer)
     trainer.train()
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()

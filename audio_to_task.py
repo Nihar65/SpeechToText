@@ -437,5 +437,5 @@ def test_with_sample_text():
     print(json.dumps(tasks, indent=2))
 
 
-if __name__ == '_main_':
+if __name__ == '__main__':
     main()
